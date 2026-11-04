@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Family, My World - English for Kids</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Comic Neue & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Neue', 'Inter', sans-serif;
+            background-color: #f0f9ff;
+            touch-action: manipulation;
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Custom Bounce Animation for visual feedback */
+        .bounce-gentle {
+            animation: bounceGentle 2s infinite;
+        }
+
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .card-flip {
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            backface-visibility: hidden;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between selection:bg-amber-200">
+
+    <!-- Top Navigation Bar / Stats -->
+    <header class="w-full bg-sky-500 text-white shadow-md p-4 sticky top-0 z-30">
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2">
+            <!-- App Logo / Title -->
+            <div class="flex items-center space-x-2">
+                <span class="text-3xl" aria-hidden="true">👨‍👩‍👧‍👦</span>
+                <h1 class="text-xl md:text-2xl font-bold tracking-wide">My Family, My World</h1>
+            </div>
+
+            <!-- Score & Progress indicator -->
+            <div id="game-stats" class="hidden flex items-center space-x-4">
+                <!-- Stars / Score -->
+                <div class="flex items-center space-x-1 bg-sky-600 px-3 py-1.5 rounded-full border border-sky-400 shadow-inner" aria-label="Score">
+                    <span class="text-amber-300 text-xl" aria-hidden="true">⭐</span>
+                    <span id="score-text" class="font-bold text-lg">0</span>
+                </div>
+
+                <!-- Progress Counter -->
+                <div class="bg-sky-600 px-3 py-1.5 rounded-full border border-sky-400 font-bold text-sm md:text-base">
+                    Exercise: <span id="current-step">1</span>/8
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progress-bar-container" class="hidden w-full bg-sky-700 h-2 mt-3 rounded-full overflow-hidden max-w-4xl mx-auto">
+            <div id="progress-bar" class="bg-amber-400 h-full w-0 transition-all duration-500 ease-out"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+
+            <!-- ---------------------------------------------------- -->
+            <!-- SCREEN 1: START / INTRO SCREEN                       -->
+            <!-- ---------------------------------------------------- -->
+            <section id="start-screen" class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-sky-200 text-center flex flex-col items-center">
+                <div class="w-28 h-28 bg-amber-100 rounded-full flex items-center justify-center mb-6 shadow-inner text-6xl bounce-gentle">
+                    🏠
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-sky-600 mb-2">Welcome to My Family!</h2>
+                <p class="text-lg text-slate-600 mb-6 max-w-md">
+                    Learn family words in English! <br>
+                    <span class="text-sm text-slate-500">(Aprende los miembros de la familia en inglés de forma divertida.)</span>
+                </p>
+
+                <div class="bg-sky-50 rounded-2xl p-4 mb-8 w-full max-w-md border border-sky-100 text-left">
+                    <h3 class="font-bold text-sky-700 mb-2 flex items-center text-base">
+                        <span class="mr-2">🎯</span> Learning Goals:
+                    </h3>
+                    <ul class="text-sm text-slate-600 space-y-1.5 list-disc list-inside">
+                        <li>Recognize family members (father, mother, sister, brother...)</li>
+                        <li>Use <strong>He is my...</strong> and <strong>She is my...</strong></li>
+                        <li>Listen to native pronunciation for every exercise! 🔊</li>
+                        <li>8 fun challenges and self-checks!</li>
+                    </ul>
+                </div>
+
+                <button id="start-btn" class="w-full sm:w-auto px-10 py-4 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-2xl rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-200 focus:outline-none focus:ring-4 focus:ring-amber-300">
+                    START / EMPEZAR 🚀
+                </button>
+            </section>
+
+
+            <!-- ---------------------------------------------------- -->
+            <!-- SCREEN 2: INTERACTIVE GAME CONTAINER                 -->
+            <!-- ---------------------------------------------------- -->
+            <section id="game-screen" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-sky-200">
+                <!-- Instruction Header -->
+                <div class="mb-6 text-center border-b border-slate-100 pb-4">
+                    <span id="exercise-type-tag" class="inline-block bg-sky-100 text-sky-700 font-bold text-xs uppercase px-3 py-1 rounded-full mb-2">
+                        Activity
+                    </span>
+                    <h2 id="instruction-title" class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-1">
+                        Instruction
+                    </h2>
+                    <p id="instruction-subtitle" class="text-base text-slate-500">
+                        Subinstrucción en español para orientación.
+                    </p>
+                </div>
+
+                <!-- Dynamic Exercise Area -->
+                <div id="exercise-area" class="min-h-[280px] flex flex-col justify-center items-center mb-6">
+                    <!-- Dynamic Content Inserted via JS -->
+                </div>
+
+                <!-- Immediate Feedback Banner -->
+                <div id="feedback-banner" class="hidden rounded-2xl p-4 mb-6 text-center border-2 transition-all duration-300">
+                    <p id="feedback-title" class="font-extrabold text-xl mb-1"></p>
+                    <p id="feedback-message" class="text-base"></p>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex justify-between items-center pt-2">
+                    <button id="reset-try-btn" class="hidden px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition focus:ring-2 focus:ring-slate-400">
+                        🔄 Try Again / Reintentar
+                    </button>
+
+                    <button id="next-btn" class="hidden ml-auto px-8 py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-lg rounded-xl shadow-md hover:shadow-lg transition focus:ring-4 focus:ring-sky-300">
+                        Next / Siguiente ➔
+                    </button>
+                </div>
+            </section>
+
+
+            <!-- ---------------------------------------------------- -->
+            <!-- SCREEN 3: RESULTS & FINAL TRANSFER                    -->
+            <!-- ---------------------------------------------------- -->
+            <section id="results-screen" class="hidden bg-white rounded-3xl p-6 md:p-10 shadow-xl border-4 border-sky-200 text-center">
+                <div class="text-6xl mb-4">🎉</div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-sky-600 mb-2">Great Job! / ¡Excelente Trabajo!</h2>
+                <p class="text-lg text-slate-600 mb-6">You completed all the family challenges!</p>
+
+                <!-- Final Score Display -->
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6 mb-8 max-w-sm mx-auto">
+                    <p class="text-slate-600 font-bold text-sm uppercase">Total Stars Earned</p>
+                    <p id="final-score" class="text-5xl font-black text-amber-500 my-2">0</p>
+                    <p id="score-evaluation" class="text-slate-700 font-semibold text-base"></p>
+                </div>
+
+                <!-- Production & Transfer Task -->
+                <div class="bg-sky-50 rounded-2xl p-6 mb-8 text-left border border-sky-100 max-w-lg mx-auto">
+                    <h3 class="font-bold text-sky-800 text-lg mb-2 flex items-center">
+                        <span class="mr-2">🗣️</span> Speaking & Production Time!
+                    </h3>
+                    <p class="text-slate-700 text-sm mb-4">
+                        Share information about your family with your teacher or classmate:
+                    </p>
+                    <div class="bg-white p-4 rounded-xl border border-sky-200 space-y-2 font-medium text-slate-800">
+                        <p>1. Point to a photo or draw your family.</p>
+                        <p>2. Say: <span class="text-sky-600 font-bold">"This is my [mother/father]."</span></p>
+                        <p>3. Say: <span class="text-sky-600 font-bold">"[He / She] is my [brother/sister]."</span></p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button id="restart-btn" class="px-8 py-3.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-lg rounded-xl shadow transition focus:ring-4 focus:ring-amber-300">
+                        Play Again / Jugar de Nuevo 🔄
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer Footer Information -->
+    <footer class="w-full bg-slate-100 text-center py-3 text-xs text-slate-500 border-t border-slate-200">
+        Unit: <strong>My Family, My World</strong> (CEFR A1) &bull; Age 6 &bull; Interactive Educational Resource
+    </footer>
+
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data Bank of 8 Exercises aligned with pedagogical document
+        const exercisesData = [
+            // Exercise 1: Flashcard / Active Recall (Mother)
+            {
+                id: 1,
+                type: "flashcard",
+                category: "Flashcards",
+                title: "Look at the picture. Who is she?",
+                subtitle: "Observa la tarjeta. ¿Quién es ella?",
+                visual: "👩",
+                targetName: "Mother / Mum",
+                options: [
+                    { text: "She is my mother.", correct: true },
+                    { text: "He is my father.", correct: false, explanation: "'He' is for men/boys. She is a woman (Mother)." },
+                    { text: "She is my brother.", correct: false, explanation: "'Brother' means hermano (male)." }
+                ],
+                successFeedback: "Great job! We use 'She' for mother (mamá). 🎉",
+            },
+            // Exercise 2: Auditory/Visual Identification (Grandfather)
+            {
+                id: 2,
+                type: "identification",
+                category: "Vocabulary",
+                title: "Click on the GRANDFATHER (Abuelo)",
+                subtitle: "Selecciona el personaje que corresponde al abuelo.",
+                options: [
+                    { visual: "👨‍🦳", label: "Grandfather", correct: true },
+                    { visual: "👶", label: "Baby", correct: false, explanation: "This is a baby (bebé)." },
+                    { visual: "👧", label: "Sister", correct: false, explanation: "This is a sister (hermana)." }
+                ],
+                successFeedback: "Awesome! Grandfather means abuelo! We use 'He' for him. 👴",
+            },
+            // Exercise 3: Memory Matching (He / She Concept)
+            {
+                id: 3,
+                type: "matching",
+                category: "Memory & Meaning",
+                title: "Match the family member to He or She",
+                subtitle: "Empareja cada miembro con su pronombre (He / She).",
+                pairs: [
+                    { item: "Father 👨", category: "He" },
+                    { item: "Sister 👧", category: "She" }
+                ],
+                successFeedback: "Excellent matching! 'He' is for boys/men, 'She' is for girls/women. 🌟",
+            },
+            // Exercise 4: Grammar Gap Filling
+            {
+                id: 4,
+                type: "multiple-choice",
+                category: "Grammar Practice",
+                title: "Complete the sentence: _____ is my brother.",
+                subtitle: "Completa el espacio para el hermano (niño).",
+                visual: "👦",
+                options: [
+                    { text: "He", correct: true },
+                    { text: "She", correct: false, explanation: "'Brother' is a boy, so we must use 'He'." },
+                    { text: "They", correct: false, explanation: "'They' is used for multiple people." }
+                ],
+                successFeedback: "Perfect! 'He is my brother' is correct! 👦",
+            },
+            // Exercise 5: Educational Mystery / Escape Room
+            {
+                id: 5,
+                type: "multiple-choice",
+                category: "Escape Room Challenge",
+                title: "Unlock the door: Who is your father's sister?",
+                subtitle: "Pista para la llave: ¿Quién es la hermana de tu papá?",
+                visual: "🔑",
+                options: [
+                    { text: "She is my aunt.", correct: true },
+                    { text: "She is my grandmother.", correct: false, explanation: "Grandmother is your dad's mother, not sister." },
+                    { text: "He is my uncle.", correct: false, explanation: "Uncle is a man (tío). Her sister is female (aunt)." }
+                ],
+                successFeedback: "Key unlocked! Your father's sister is your AUNT (Tía). 🔓",
+            },
+            // Exercise 6: Vocabulary Discrimination
+            {
+                id: 6,
+                type: "multiple-choice",
+                category: "Pronunciation & Vocab",
+                title: "Look at the picture: Who is this?",
+                subtitle: "¿Quién es este integrante de la familia?",
+                visual: "👶",
+                options: [
+                    { text: "It is the baby.", correct: true },
+                    { text: "She is the aunt.", correct: false, explanation: "Aunt is an adult woman." },
+                    { text: "He is the grandfather.", correct: false, explanation: "Grandfather is an old man." }
+                ],
+                successFeedback: "Correct! Baby is the youngest family member. 👶",
+            },
+            // Exercise 7: Sentence Selection
+            {
+                id: 7,
+                type: "multiple-choice",
+                category: "Grammar Challenge",
+                title: "Which sentence correctly describes the picture?",
+                subtitle: "Elige la oración gramaticalmente correcta.",
+                visual: "👵",
+                options: [
+                    { text: "She is my grandmother.", correct: true },
+                    { text: "He is my grandmother.", correct: false, explanation: "Grandmother is female, so use 'She', not 'He'." },
+                    { text: "She are my grandmother.", correct: false, explanation: "For one person (She), use 'is', not 'are'." }
+                ],
+                successFeedback: "Spot on! We say 'She IS my grandmother'. 👵",
+            },
+            // Exercise 8: Interactive Sentence Assembly
+            {
+                id: 8,
+                type: "unscramble",
+                category: "Final Production",
+                title: "Put the words in order to introduce mum!",
+                subtitle: "Ordena las palabras para formar la oración correcta.",
+                visual: "👩",
+                words: ["She", "is", "my", "mother."],
+                correctOrder: ["She", "is", "my", "mother."],
+                successFeedback: "Fantastic! You built the complete sentence: 'She is my mother.' 🎉",
+            }
+        ];
+
+        // App State
+        let currentExerciseIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+        let failedIndexes = [];
+
+        // Audio Speech Synthesis Function
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                // Cancel previous speech if playing
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85; // Slightly slower speed for 6-year-old learners
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const gameStats = document.getElementById('game-stats');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resetTryBtn = document.getElementById('reset-try-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const currentStepEl = document.getElementById('current-step');
+        const scoreTextEl = document.getElementById('score-text');
+        const exerciseTypeTag = document.getElementById('exercise-type-tag');
+        const instructionTitle = document.getElementById('instruction-title');
+        const instructionSubtitle = document.getElementById('instruction-subtitle');
+        const exerciseArea = document.getElementById('exercise-area');
+        const feedbackBanner = document.getElementById('feedback-banner');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const finalScoreEl = document.getElementById('final-score');
+        const scoreEvaluationEl = document.getElementById('score-evaluation');
+
+        // Initial setup
+        startBtn.addEventListener('click', startGame);
+        nextBtn.addEventListener('click', handleNextStep);
+        resetTryBtn.addEventListener('click', resetCurrentExercise);
+        restartBtn.addEventListener('click', startGame);
+
+        function startGame() {
+            currentExerciseIndex = 0;
+            score = 0;
+            failedIndexes = [];
+            
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameStats.classList.remove('hidden');
+            progressBarContainer.classList.remove('hidden');
+
+            updateHeaderStats();
+            renderExercise();
+        }
+
+        function updateHeaderStats() {
+            scoreTextEl.textContent = score;
+            currentStepEl.textContent = currentExerciseIndex + 1;
+            const progressPercent = ((currentExerciseIndex) / exercisesData.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+        }
+
+        function renderExercise() {
+            const exercise = exercisesData[currentExerciseIndex];
+            hideFeedback();
+            nextBtn.classList.add('hidden');
+            resetTryBtn.classList.add('hidden');
+
+            exerciseTypeTag.textContent = exercise.category;
+            instructionTitle.textContent = exercise.title;
+            instructionSubtitle.textContent = exercise.subtitle;
+
+            exerciseArea.innerHTML = '';
+
+            // Render based on exercise type
+            if (exercise.type === 'flashcard') {
+                renderFlashcard(exercise);
+            } else if (exercise.type === 'identification') {
+                renderIdentification(exercise);
+            } else if (exercise.type === 'multiple-choice') {
+                renderMultipleChoice(exercise);
+            } else if (exercise.type === 'matching') {
+                renderMatching(exercise);
+            } else if (exercise.type === 'unscramble') {
+                renderUnscramble(exercise);
+            }
+
+            updateHeaderStats();
+        }
+
+        /* ---------------------------------------------------- */
+        /* EXERCISE RENDERERS & LOGIC                           */
+        /* ---------------------------------------------------- */
+
+        // 1. Flashcard Active Recall Renderer
+        function renderFlashcard(data) {
+            const container = document.createElement('div');
+            container.className = "flex flex-col items-center w-full max-w-md";
+
+            container.innerHTML = `
+                <div id="flashcard-inner" class="w-64 h-64 bg-amber-50 border-4 border-amber-300 rounded-3xl flex flex-col items-center justify-center p-4 shadow-md cursor-pointer transition hover:scale-105 mb-6 relative">
+                    <button id="audio-btn-flash" class="absolute top-3 right-3 bg-amber-200 hover:bg-amber-300 text-amber-800 p-2 rounded-full shadow transition" title="Listen / Escuchar">
+                        🔊
+                    </button>
+                    <span class="text-8xl mb-2">${data.visual}</span>
+                    <span id="flashcard-label" class="text-sm font-bold text-amber-700 bg-amber-200 px-3 py-1 rounded-full">Click to Reveal / Toca para revelar</span>
+                </div>
+                <div id="flashcard-options" class="w-full space-y-3 hidden">
+                    ${data.options.map((opt, i) => `
+                        <button onclick="checkOption(${i})" class="option-btn w-full p-4 bg-slate-50 hover:bg-sky-50 border-2 border-slate-200 hover:border-sky-300 font-bold text-slate-800 rounded-2xl text-left transition flex justify-between items-center">
+                            <span>${opt.text}</span>
+                            <div class="flex items-center space-x-2">
+                                <span onclick="event.stopPropagation(); speakText('${opt.text.replace(/'/g, "\\'")}')" class="text-amber-500 hover:text-amber-600 p-1 text-lg" title="Listen">🔊</span>
+                                <span class="text-sky-500 font-extrabold">➔</span>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            exerciseArea.appendChild(container);
+
+            const card = container.querySelector('#flashcard-inner');
+            const label = container.querySelector('#flashcard-label');
+            const audioBtn = container.querySelector('#audio-btn-flash');
+            const optionsDiv = container.querySelector('#flashcard-options');
+
+            audioBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                speakText(data.targetName);
+            });
+
+            card.addEventListener('click', () => {
+                card.classList.add('bg-sky-50', 'border-sky-300');
+                label.textContent = data.targetName;
+                label.classList.remove('bg-amber-200', 'text-amber-700');
+                label.classList.add('bg-sky-200', 'text-sky-800', 'text-lg');
+                optionsDiv.classList.remove('hidden');
+                speakText(data.targetName);
+            });
+        }
+
+        // 2. Visual Identification Renderer
+        function renderIdentification(data) {
+            const container = document.createElement('div');
+            container.className = "grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl";
+
+            data.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "p-6 bg-slate-50 hover:bg-sky-50 border-4 border-slate-200 hover:border-sky-400 rounded-3xl flex flex-col items-center justify-center transition shadow-sm hover:shadow-md relative group";
+                btn.innerHTML = `
+                    <span onclick="event.stopPropagation(); speakText('${opt.label}')" class="absolute top-2 right-2 text-xl p-1 text-amber-500 hover:scale-125 transition" title="Listen">🔊</span>
+                    <span class="text-7xl mb-3">${opt.visual}</span>
+                    <span class="font-bold text-slate-700">${opt.label}</span>
+                `;
+                btn.addEventListener('click', () => {
+                    speakText(opt.label);
+                    checkOption(i);
+                });
+                container.appendChild(btn);
+            });
+
+            exerciseArea.appendChild(container);
+        }
+
+        // 3. Multiple Choice Renderer
+        function renderMultipleChoice(data) {
+            const container = document.createElement('div');
+            container.className = "flex flex-col items-center w-full max-w-md space-y-4";
+
+            if (data.visual) {
+                const visualEl = document.createElement('div');
+                visualEl.className = "text-7xl mb-2 bg-sky-50 p-4 rounded-3xl border-2 border-sky-100 relative";
+                visualEl.innerHTML = `
+                    ${data.visual}
+                    <button onclick="speakText('${data.title.replace(/'/g, "\\'")}')" class="absolute -top-2 -right-2 bg-amber-400 text-slate-900 p-2 text-sm rounded-full shadow font-bold hover:bg-amber-500" title="Listen to question">🔊</button>
+                `;
+                container.appendChild(visualEl);
+            }
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = "w-full space-y-3";
+
+            data.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = "option-btn w-full p-4 bg-slate-50 hover:bg-sky-50 border-2 border-slate-200 hover:border-sky-300 font-bold text-slate-800 rounded-2xl text-left transition flex justify-between items-center";
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <div class="flex items-center space-x-2">
+                        <span onclick="event.stopPropagation(); speakText('${opt.text.replace(/'/g, "\\'")}')" class="text-amber-500 hover:text-amber-600 p-1 text-lg" title="Listen">🔊</span>
+                        <span class="text-slate-400">⚪</span>
+                    </div>
+                `;
+                btn.addEventListener('click', () => {
+                    speakText(opt.text);
+                    checkOption(i);
+                });
+                optionsDiv.appendChild(btn);
+            });
+
+            container.appendChild(optionsDiv);
+            exerciseArea.appendChild(container);
+        }
+
+        // 4. Concept Matching Renderer
+        function renderMatching(data) {
+            const container = document.createElement('div');
+            container.className = "w-full max-w-md space-y-4";
+
+            let userSelections = {};
+
+            data.pairs.forEach((pair, idx) => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-4 bg-slate-50 rounded-2xl border-2 border-slate-200";
+                row.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <button onclick="speakText('${pair.item.split(' ')[0]}')" class="text-amber-500 text-lg hover:scale-110 transition" title="Listen">🔊</button>
+                        <span class="font-bold text-lg text-slate-800">${pair.item}</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button data-row="${idx}" data-val="He" class="match-btn px-4 py-2 bg-white border-2 border-slate-300 rounded-xl font-bold text-sky-600 hover:bg-sky-100">He</button>
+                        <button data-row="${idx}" data-val="She" class="match-btn px-4 py-2 bg-white border-2 border-slate-300 rounded-xl font-bold text-pink-600 hover:bg-pink-100">She</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = "w-full py-3.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-lg rounded-xl shadow mt-4";
+            submitBtn.textContent = "Check Answers / Comprobar 🎯";
+
+            container.appendChild(submitBtn);
+            exerciseArea.appendChild(container);
+
+            // Handle match selection
+            container.querySelectorAll('.match-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const row = e.target.getAttribute('data-row');
+                    const val = e.target.getAttribute('data-val');
+
+                    speakText(val);
+                    userSelections[row] = val;
+
+                    // Update UI state for buttons in this row
+                    container.querySelectorAll(`[data-row="${row}"]`).forEach(b => {
+                        b.classList.remove('bg-sky-500', 'bg-pink-500', 'text-white');
+                        b.classList.add('bg-white');
+                    });
+
+                    if (val === 'He') {
+                        e.target.classList.remove('bg-white');
+                        e.target.classList.add('bg-sky-500', 'text-white');
+                    } else {
+                        e.target.classList.remove('bg-white');
+                        e.target.classList.add('bg-pink-500', 'text-white');
+                    }
+                });
+            });
+
+            submitBtn.addEventListener('click', () => {
+                if (Object.keys(userSelections).length < data.pairs.length) {
+                    showFeedback(false, "Please select He or She for both family members! / Selecciona una opción para cada uno.");
+                    return;
+                }
+
+                let allCorrect = true;
+                data.pairs.forEach((pair, idx) => {
+                    if (userSelections[idx] !== pair.category) {
+                        allCorrect = false;
+                    }
+                });
+
+                if (allCorrect) {
+                    score += 10;
+                    showFeedback(true, data.successFeedback);
+                    speakText(data.successFeedback);
+                    nextBtn.classList.remove('hidden');
+                } else {
+                    showFeedback(false, "Remember: Father is male (He), Sister is female (She). Try again!");
+                    resetTryBtn.classList.remove('hidden');
+                }
+            });
+        }
+
+        // 5. Unscramble Sentence Renderer
+        function renderUnscramble(data) {
+            const container = document.createElement('div');
+            container.className = "flex flex-col items-center w-full max-w-md";
+
+            let currentAssembled = [];
+
+            const targetBox = document.createElement('div');
+            targetBox.className = "w-full min-h-[64px] p-3 bg-sky-50 border-2 border-dashed border-sky-300 rounded-2xl flex flex-wrap gap-2 items-center justify-center mb-6";
+            
+            const wordsBox = document.createElement('div');
+            wordsBox.className = "flex flex-wrap gap-2 justify-center mb-6";
+
+            // Shuffle words for challenge
+            const shuffledWords = [...data.words].sort(() => 0.5 - Math.random());
+
+            shuffledWords.forEach((word) => {
+                const wordBtn = document.createElement('button');
+                wordBtn.className = "px-4 py-2 bg-white border-2 border-slate-300 hover:border-amber-400 font-bold text-slate-800 rounded-xl shadow-sm text-lg transition flex items-center space-x-1";
+                wordBtn.innerHTML = `<span>${word}</span>`;
+
+                wordBtn.addEventListener('click', () => {
+                    speakText(word.replace('.', ''));
+                    if (wordBtn.parentElement === wordsBox) {
+                        targetBox.appendChild(wordBtn);
+                        currentAssembled.push(word);
+                    } else {
+                        wordsBox.appendChild(wordBtn);
+                        currentAssembled = currentAssembled.filter(w => w !== word);
+                    }
+                });
+
+                wordsBox.appendChild(wordBtn);
+            });
+
+            const checkBtn = document.createElement('button');
+            checkBtn.className = "w-full py-3.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-lg rounded-xl shadow";
+            checkBtn.textContent = "Check Sentence / Comprobar 🎯";
+
+            checkBtn.addEventListener('click', () => {
+                const userSentence = currentAssembled.join(' ');
+                const targetSentence = data.correctOrder.join(' ');
+
+                if (userSentence === targetSentence) {
+                    score += 10;
+                    speakText(targetSentence);
+                    showFeedback(true, data.successFeedback);
+                    nextBtn.classList.remove('hidden');
+                } else {
+                    showFeedback(false, "Not quite right! Sentence order: Subject (She) + Verb (is) + Complement (my mother).");
+                    resetTryBtn.classList.remove('hidden');
+                }
+            });
+
+            container.appendChild(targetBox);
+            container.appendChild(wordsBox);
+            container.appendChild(checkBtn);
+            exerciseArea.appendChild(container);
+        }
+
+        /* ---------------------------------------------------- */
+        /* COMMON OPTION CHECKER & FEEDBACK LOGIC               */
+        /* ---------------------------------------------------- */
+        function checkOption(optionIndex) {
+            const exercise = exercisesData[currentExerciseIndex];
+            const selected = exercise.options[optionIndex];
+
+            // Disable all option buttons in current exercise to prevent multi-clicks
+            const btns = exerciseArea.querySelectorAll('button');
+            btns.forEach(b => b.disabled = true);
+
+            if (selected.correct) {
+                score += 10;
+                speakText(selected.text || exercise.successFeedback);
+                showFeedback(true, exercise.successFeedback);
+                nextBtn.classList.remove('hidden');
+            } else {
+                const explanation = selected.explanation || "That is not correct. Try again!";
+                showFeedback(false, explanation);
+                resetTryBtn.classList.remove('hidden');
+            }
+        }
+
+        function showFeedback(isSuccess, message) {
+            feedbackBanner.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-800', 'bg-amber-50', 'border-amber-300', 'text-amber-800');
+
+            if (isSuccess) {
+                feedbackBanner.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-800');
+                feedbackTitle.textContent = "🌟 Correct! / ¡Muy bien!";
+            } else {
+                feedbackBanner.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-800');
+                feedbackTitle.textContent = "💡 Keep Trying! / Inténtalo de nuevo";
+            }
+
+            feedbackMessage.textContent = message;
+        }
+
+        function hideFeedback() {
+            feedbackBanner.classList.add('hidden');
+        }
+
+        function resetCurrentExercise() {
+            renderExercise();
+        }
+
+        function handleNextStep() {
+            currentExerciseIndex++;
+
+            if (currentExerciseIndex < exercisesData.length) {
+                renderExercise();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            gameScreen.classList.add('hidden');
+            gameStats.classList.add('hidden');
+            progressBarContainer.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            finalScoreEl.textContent = `${score} pts`;
+
+            if (score >= 70) {
+                scoreEvaluationEl.textContent = "🏆 Super Family Scholar! Perfect understanding of He/She and family vocabulary.";
+            } else {
+                scoreEvaluationEl.textContent = "👍 Good effort! You are on your way to mastering family words in English.";
+            }
+        }
+    </script>
+</body>
+</html>
